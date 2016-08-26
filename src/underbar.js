@@ -231,21 +231,29 @@
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
-    if (iterator !== undefined) {
-      for (var i = 0; i < collection.length; i++) {
-        if (iterator(collection[i])) {
-          return true;
-        }
+    iterator = iterator || _.identity;
+    return !_.every(collection, function(element) {
+      if (iterator(element)) {
+        return false;
       }
-      return false;
-    } else {
-      for (var j = 0; j < collection.length; j++) {
-        if (collection[j]) {
-          return true;
-        }
-      }
-      return false;
-    }
+      return true;
+    });
+
+    // if (iterator !== undefined) {
+    //   for (var i = 0; i < collection.length; i++) {
+    //     if (iterator(collection[i])) {
+    //       return true;
+    //     }
+    //   }
+    //   return false;
+    // } else {
+    //   for (var j = 0; j < collection.length; j++) {
+    //     if (collection[j]) {
+    //       return true;
+    //     }
+    //   }
+    //   return false;
+    // }
   };
 
 
