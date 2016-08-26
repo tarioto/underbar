@@ -277,27 +277,42 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
-    for (var i = 1; i < arguments.length; i++) {
-      for (var key in arguments[i]) {
-        obj[key] = arguments[i][key];
-      }
-
-    }
+    _.each(arguments, function(arg) {
+      _.each(arg, function(element, key) {
+        obj[key] = element;
+      });
+    });
     return obj;
+
+    // for (var i = 1; i < arguments.length; i++) {
+    //   for (var key in arguments[i]) {
+    //     obj[key] = arguments[i][key];
+    //   }
+    //
+    // }
+    // return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
-    for (var i = 1; i < arguments.length; i++) {
-      for (var key in arguments[i]) {
+    _.each(arguments, function(arg) {
+      _.each(arg, function(element, key) {
         if (obj[key] === undefined) {
-          obj[key] = arguments[i][key];
+          obj[key] = element;
         }
-      }
-
-    }
+      });
+    });
     return obj;
+    // for (var i = 1; i < arguments.length; i++) {
+    //   for (var key in arguments[i]) {
+    //     if (obj[key] === undefined) {
+    //       obj[key] = arguments[i][key];
+    //     }
+    //   }
+    //
+    // }
+    // return obj;
   };
 
 
@@ -359,7 +374,9 @@
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
     var a = Array.prototype.slice.call(arguments, 2);
-    setTimeout(function() { return func.apply(this, a); }, wait );
+    setTimeout(function() {
+      return func.apply(this, a);
+    }, wait );
   };
 
 
@@ -376,11 +393,11 @@
   _.shuffle = function(array) {
     var arr = Array.prototype.slice.call(array, 0);
     var answer = [];
-    for (var i = 0; i < array.length; i++) {
+    _.each(array, function(element) {
       var randomNum = Math.floor(Math.random() * arr.length);
       answer.push(arr[randomNum]);
       arr.splice(randomNum, 1);
-    }
+    });
     return answer;
   };
 
@@ -433,8 +450,6 @@
     var longest = args.sort(function(a, b) {
       return b.length - a.length;
     })[0].length;
-// [[1,2,3],[1,2 3,4], [1,2]] --> [[1,2,3,4], [1, 2, 3], [1, 2]]
-    //find longest array in args
     var arr1 = [];
     var arr2 = [];
 
@@ -447,6 +462,8 @@
     }
     return arr1;
   };
+  // [[1,2,3],[1,2 3,4], [1,2]] --> [[1,2,3,4], [1, 2, 3], [1, 2]]
+      //find longest array in args
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
   // The new array should contain all elements of the multidimensional array.
@@ -457,13 +474,13 @@
       return a.concat(b); });*/
     var array = result || [];
 
-    for (var i = 0; i < nestedArray.length; i++) {
-      if (typeof nestedArray[i] === 'number') {
-        array.push(nestedArray[i]);
+    _.each(nestedArray, function(element) {
+      if (typeof element === 'number') {
+        array.push(element);
       } else {
-        _.flatten(nestedArray[i], array);
+        _.flatten(element, array);
       }
-    }
+    });
     return array;
   };
 
