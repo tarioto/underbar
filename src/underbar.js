@@ -80,7 +80,7 @@
   _.filter = function(collection, test) {
     var acc = [];
     _.each(collection, function(element) {
-      if (test(element)){
+      if (test(element)) {
         acc.push(element);
       }
     });
@@ -189,13 +189,60 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    if (iterator !== undefined) {
+      for (var i = 0; i < collection.length; i++) {
+        if (!iterator(collection[i])) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      for (var j = 0; j < collection.length; j++) {
+        if (!collection[j]) {
+          return false;
+        }
+      }
+      return true;
+    }
+  // return _.reduce(collection, function(a, b){
+  //   if (!iterator(a)) {
+  //     return false;
+  //   }
+  //   b = a;
+  // }, true)
+
+
+/* if (Array.isArray(collection)) {
+    return _.reduce(collection, function(wasFound, item) {
+      if (wasFound) {
+        return true;
+      }
+      return item === target;
+    }, false);
+    */
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    if (iterator !== undefined) {
+      for (var i = 0; i < collection.length; i++) {
+        if (iterator(collection[i])) {
+          return true;
+        }
+      }
+      return false;
+    } else {
+      for (var j = 0; j < collection.length; j++) {
+        if (collection[j]) {
+          return true;
+        }
+      }
+      return false;
+    }
   };
+
 
 
   /**
@@ -217,11 +264,27 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    for (var i = 1; i < arguments.length; i++) {
+      for (var key in arguments[i]) {
+        obj[key] = arguments[i][key];
+      }
+
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    for (var i = 1; i < arguments.length; i++) {
+      for (var key in arguments[i]) {
+        if (obj[key] === undefined) {
+          obj[key] = arguments[i][key];
+        }
+      }
+
+    }
+    return obj;
   };
 
 
@@ -265,6 +328,14 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var cached = {};
+    return function() {
+      var arg = JSON.stringify(arguments);
+      if (cached[arg] === undefined) {
+        cached[arg] = func.apply(this, arguments);
+      }
+      return cached[arg];
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -274,6 +345,8 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var a = Array.prototype.slice.call(arguments, 2);
+    setTimeout(function() { return func.apply(this, a); }, wait );
   };
 
 
@@ -288,6 +361,14 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var arr = Array.prototype.slice.call(array, 0);
+    var answer = [];
+    for (var i = 0; i < array.length; i++) {
+      var randomNum = Math.floor(Math.random() * arr.length);
+      answer.push(arr[randomNum]);
+      arr.splice(randomNum, 1);
+    }
+    return answer;
   };
 
 
@@ -302,6 +383,15 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    return _.map(collection, function(el) {
+      var a;
+      if (typeof functionOrKey === 'string') {
+        a = el[functionOrKey];
+      } else {
+        a = functionOrKey;
+      }
+      return a.apply(el);
+    });
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -309,6 +399,15 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    if (typeof iterator === 'string') {
+      return collection.sort(function(a, b) {
+        return a[iterator] - b[iterator];
+      });
+    } else {
+      return collection.sort(function(a, b) {
+        return iterator(a) - iterator(b);
+      });
+    }
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -317,6 +416,23 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var longest = args.sort(function(a, b) {
+      return b.length - a.length;
+    })[0].length;
+// [[1,2,3],[1,2 3,4], [1,2]] --> [[1,2,3,4], [1, 2, 3], [1, 2]]
+    //find longest array in args
+    var arr1 = [];
+    var arr2 = [];
+
+    for (var i = 0; i < longest; i++) {
+      for (var j = 0; j < arguments.length; j++) {
+        arr2.push(arguments[j][i]);
+      }
+      arr1.push(arr2);
+      arr2 = [];
+    }
+    return arr1;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -324,13 +440,48 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    /*return nestedArray.reduce(function(a, b) {
+      return a.concat(b); });*/
+    var array = result || [];
+
+    for (var i = 0; i < nestedArray.length; i++) {
+      if (typeof nestedArray[i] === 'number') {
+        array.push(nestedArray[i]);
+      } else {
+        _.flatten(nestedArray[i], array);
+      }
+    }
+    return array;
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
-  };
+    var args = Array.prototype.slice.call(arguments);
+    _.each(args[0], function(item) {
+      for (var i = 1; i < args.length; i++) {
+        var shared = false;
+        _.each(args[i], function(el) {
+          if (item === el) {
+            if (shared) {
 
+            }
+            shared = true;
+          }
+        });
+      }
+
+    });
+
+    //
+    //take index 0 of arguments
+    //
+  };
+// [1, 2, 3] [3, 1, 1],[5, 3, 6]
+// [1, 1, 1, 2, 3, 3, 5, 6]
+//var stooges = ['moe', 'curly', 'larry'];
+// var leaders = ['moe', 'groucho'];
+// expect(_.intersection(stooges, leaders)).to.eql(['moe']);
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
