@@ -458,24 +458,27 @@
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
     var args = Array.prototype.slice.call(arguments);
-    _.each(args[0], function(item) {
-      for (var i = 1; i < args.length; i++) {
-        var shared = false;
-        _.each(args[i], function(el) {
-          if (item === el) {
-            if (shared) {
 
-            }
-            shared = true;
+    var result = [];
+
+    _.each(args[0], function(el) {
+      var counter = 1;
+
+      for (var i = 1; i < args.length; i++) {
+        for (var j = 0; j < args[i].length; j++) {
+          if (args[i][j] === el) {
+            counter++;
+            break;
           }
-        });
+        }
+      }
+
+      if (counter === args.length) {
+        result.push(el);
       }
 
     });
-
-    //
-    //take index 0 of arguments
-    //
+    return result;
   };
 // [1, 2, 3] [3, 1, 1],[5, 3, 6]
 // [1, 1, 1, 2, 3, 3, 5, 6]
@@ -485,6 +488,28 @@
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+    var args = Array.prototype.slice.call(arguments);
+
+    var result = [];
+
+    _.each(args[0], function(el) {
+      var counter = 0;
+
+      for (var i = 1; i < args.length; i++) {
+        for (var j = 0; j < args[i].length; j++) {
+          if (args[i][j] === el) {
+            counter++;
+            break;
+          }
+        }
+      }
+
+      if (counter === 0) {
+        result.push(el);
+      }
+
+    });
+    return result;
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once
@@ -493,5 +518,16 @@
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+    var waiting = false;
+    return function() {
+      if (!waiting) {
+
+        func.call();
+        waiting = true;
+        setTimeout(function() {
+          waiting = false;
+        }, wait);
+      }
+    };
   };
 }());
